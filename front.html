@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Text File Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="x.css">
+</head>
+<body style="background-color: antiquewhite;">
+
+  
+  <h1>Text Content for edit</h1><br />
+<textarea id="file_contents_for_update"></textarea> <br />
+<button type="button" onclick="updateFile()">Update</button>
+<br><br>
+    <h1>Text Content</h1><br />
+  <div id="file-contents">File content</div> <br /><hr>
+  <h1>Add Text</h1>
+  <form>
+    <label for="add-text"></label>
+    <input type="text" id="add-text">
+    <button type="button" onclick="addText()">Add</button> <hr>
+    <h2>Delete file content:</h2>Delete file content: <button style="background-color: rgb(236, 94, 94);" type="button" onclick="editText()">Delete</button><hr>
+  </form>
+  <!-- serch options -->
+<h1>Serch option's</h1>
+<div>
+    <label for="search-word">Search for word:</label>
+    <input type="text" id="search-word"><br><br>
+    To serch for word in the content<mark>(the word will be marked in the text)</mark>: &nbsp;&nbsp;<button type="button" onclick="searchWord()">Search</button><br><br>
+    To serch how many times a word eppeard in the content content:&nbsp;&nbsp;<button type="button" onclick="searchWordtimes()">Search</button>
+</div><br>
+<div id="search-result"></div><br>
+
+
+</body>
+<!-- /////////////// JAVA SCRIPT PART //////////////////////////////------------------------------- -->
+<script>
+    const MY_SERVER = "http://127.0.0.1:5000";
+const fileContents = document.getElementById("file-contents");
+
+//////////////////////// Show Text ////////////////
+axios.get(MY_SERVER+"/")
+  .then(response => {
+    fileContents.innerHTML = response.data;
+  })
+  .catch(error => {
+    console.log(error);
+  });
+//////////////////////// Add Text ////////////////
+function addText() {
+  const addText = document.getElementById("add-text").value;
+  axios.post(MY_SERVER+"/add", { text: addText })
+    .then(response => {
+      alert(response.data);
+    })
+    .catch(error => {
+      console.log(error);
+    });
+}
+//////////////////////// Edit Text ////////////////
+function editText() {
+    const editText = document.getElementById("add-text").value;
+    axios.put(MY_SERVER + '/edit', { text: editText })
+      .then(response => {
+        alert(response.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
+//////////////////////// check how many time the word epear ////////////////
+function searchWordtimes() {
+    const searchWord = document.getElementById("search-word").value;
+    axios.get(MY_SERVER + '/search/' + searchWord)
+        .then(response => {
+            document.getElementById("search-result").innerHTML = "The word '" + searchWord + "' appears " + response.data + " time(s) in the file."
+        })
+        .catch(error => {
+            console.log(error);
+        });
+}
+/////////////////////  serch word //////////////////////
+// Search for a word in the file's contents
+function searchWord() {
+    const searchWord = document.getElementById("search-word").value;
+    axios.get(MY_SERVER + '/')
+        .then(response => {
+            let contents = response.data;
+            contents = contents.replace(new RegExp(searchWord, "gi"), "<mark>"+searchWord+"</mark>");
+            fileContents.innerHTML = contents;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+}
+/////////////////// other edit ///////////////////
+const file_content_for_edit = document.getElementById("file_contents_for_update");
+
+// Show the contents of the file in the textarea
+axios.get(MY_SERVER+"/")
+  .then(response => {
+    file_content_for_edit.innerHTML = response.data;
+  })
+  .catch(error => {
+    console.log(error);
+  });
+  
+function updateFile() {
+    // Get the new contents of the textarea
+    const newContents = file_content_for_edit.value;
+    // Send a PUT request to the '/edit' endpoint with the new contents
+    axios.put(MY_SERVER+"/edit", { text: newContents })
+    .then(response => {
+        alert(response.data);
+    })
+    .catch(error => {
+        console.log(error);
+    });
+}
+/////////////////////////////////////////////////////////////
+
+
+
+
+    
+</script>
+</html>
